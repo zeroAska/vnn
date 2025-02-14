@@ -16,7 +16,7 @@ def knn(x, k):
     return idx
 
 
-def get_graph_feature(x, k=20, idx=None, x_coord=None):
+def get_graph_feature(x, k=20, idx=None, x_coord=None, is_dir_only=False):
     batch_size = x.size(0)
     num_points = x.size(3)
     x = x.view(batch_size, -1, num_points)
@@ -40,8 +40,11 @@ def get_graph_feature(x, k=20, idx=None, x_coord=None):
     feature = x.view(batch_size*num_points, -1)[idx, :]
     feature = feature.view(batch_size, num_points, k, num_dims, 3) 
     x = x.view(batch_size, num_points, 1, num_dims, 3).repeat(1, 1, k, 1, 1)
-    
-    feature = torch.cat((feature-x, x), dim=3).permute(0, 3, 4, 1, 2).contiguous()
+
+    if is_dir_only:
+        feature = (feature-x).permute(0, 3, 4, 1, 2).contiguous()
+    else:
+        feature = torch.cat((feature-x, x), dim=3).permute(0, 3, 4, 1, 2).contiguous()
   
     return feature
 

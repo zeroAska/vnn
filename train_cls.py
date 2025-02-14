@@ -1,5 +1,5 @@
 """
-Author: Congyue Deng
+Elmarit 21 ASPH iAuthor: Congyue Deng
 Contact: congyue@stanford.edu
 Date: April 2021
 """
@@ -115,7 +115,7 @@ def main(args):
 
     '''DATA LOADING'''
     log_string('Load dataset ...')
-    DATA_PATH = 'data/modelnet40_normal_resampled/'
+    DATA_PATH = '../data/EvenAlignedModelNet40PC/'
 
     TRAIN_DATASET = ModelNetDataLoader(root=DATA_PATH, npoint=args.num_point, split='train', normal_channel=args.normal)
     TEST_DATASET = ModelNetDataLoader(root=DATA_PATH, npoint=args.num_point, split='test', normal_channel=args.normal)

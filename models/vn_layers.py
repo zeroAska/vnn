@@ -61,6 +61,7 @@ class VNLinearLeakyReLU(nn.Module):
         '''
         x: point features of shape [B, N_feat, 3, N_samples, ...]
         '''
+        import ipdb; ipdb.set_trace()
         # Linear
         p = self.map_to_feat(x.transpose(1,-1)).transpose(1,-1)
         # BatchNorm

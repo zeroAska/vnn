@@ -45,9 +45,125 @@ def get_graph_feature(x, k=20, idx=None, x_coord=None, is_dir_only=False):
         feature = (feature-x).permute(0, 3, 4, 1, 2).contiguous()
     else:
         feature = torch.cat((feature-x, x), dim=3).permute(0, 3, 4, 1, 2).contiguous()
+
+
+    # output shape: [batch, num_channels, 3, num_points, n_knn]
+    return feature
+
+
+def get_neighbor_euclidean_ind(x_coord, k=20):
+    batch_size = x.size(0)
+    num_points = x.size(3)
+    ipdb.set_trace()
+    x = x.view(batch_size, -1, num_points)
+    idx = knn(x, k=k)
+    device = torch.device('cuda')
+    idx_base = torch.arange(0, batch_size, device=device).view(-1, 1, 1)*num_points
+
+    idx = idx + idx_base
+
+    idx = idx.view(-1)
+ 
+    _, num_dims, _ = x.size()
+    
+
+
+def edge_coord_msg_multi_type(x, k=20, idx=None, x_coord=None):
+    batch_size = x.size(0)
+    num_points = x.size(3)
+    x = x.view(batch_size, -1, num_points)
+    if idx is None:
+        if x_coord is None: # dynamic knn graph
+            idx = knn(x, k=k)
+        else:          # fixed knn graph with input point coordinates
+            idx = knn(x_coord, k=k)
+    device = torch.device('cuda')
+
+    idx_base = torch.arange(0, batch_size, device=device).view(-1, 1, 1)*num_points
+
+    idx = idx + idx_base
+
+    idx = idx.view(-1)
+ 
+    _, num_dims, _ = x.size()
+    num_dims = num_dims // 3
+
+    x = x.transpose(2, 1).contiguous()
+    feature = x.view(batch_size*num_points, -1)[idx, :]
+    feature = feature.view(batch_size, num_points, k, num_dims, 3) 
+    x = x.view(batch_size, num_points, 1, num_dims, 3).repeat(1, 1, k, 1, 1)
+
+    if is_dir_only:
+        feature = (feature-x).permute(0, 3, 4, 1, 2).contiguous()
+    else:
+        feature = torch.cat((feature-x, x), dim=3).permute(0, 3, 4, 1, 2).contiguous()
   
     return feature
 
+
+def edge_steerable_msg_multi_type(x, k=20, idx=None, x_coord=None):
+    batch_size = x.size(0)
+    num_points = x.size(3)
+    x = x.view(batch_size, -1, num_points)
+    if idx is None:
+        if x_coord is None: # dynamic knn graph
+            idx = knn(x, k=k)
+        else:          # fixed knn graph with input point coordinates
+            idx = knn(x_coord, k=k)
+    device = torch.device('cuda')
+
+    idx_base = torch.arange(0, batch_size, device=device).view(-1, 1, 1)*num_points
+
+    idx = idx + idx_base
+
+    idx = idx.view(-1)
+ 
+    _, num_dims, _ = x.size()
+    num_dims = num_dims // 3
+
+    x = x.transpose(2, 1).contiguous()
+    feature = x.view(batch_size*num_points, -1)[idx, :]
+    feature = feature.view(batch_size, num_points, k, num_dims, 3) 
+    x = x.view(batch_size, num_points, 1, num_dims, 3).repeat(1, 1, k, 1, 1)
+
+    if is_dir_only:
+        feature = (feature-x).permute(0, 3, 4, 1, 2).contiguous()
+    else:
+        feature = torch.cat((feature-x, x), dim=3).permute(0, 3, 4, 1, 2).contiguous()
+  
+    return feature
+
+def edge_invariant_msg_multi_type(x, k=20, idx=None, x_coord=None):
+    batch_size = x.size(0)
+    num_points = x.size(3)
+    x = x.view(batch_size, -1, num_points)
+    if idx is None:
+        if x_coord is None: # dynamic knn graph
+            idx = knn(x, k=k)
+        else:          # fixed knn graph with input point coordinates
+            idx = knn(x_coord, k=k)
+    device = torch.device('cuda')
+
+    idx_base = torch.arange(0, batch_size, device=device).view(-1, 1, 1)*num_points
+
+    idx = idx + idx_base
+
+    idx = idx.view(-1)
+ 
+    _, num_dims, _ = x.size()
+    num_dims = num_dims // 3
+
+    x = x.transpose(2, 1).contiguous()
+    feature = x.view(batch_size*num_points, -1)[idx, :]
+    feature = feature.view(batch_size, num_points, k, num_dims, 3) 
+    x = x.view(batch_size, num_points, 1, num_dims, 3).repeat(1, 1, k, 1, 1)
+
+    if is_dir_only:
+        feature = (feature-x).permute(0, 3, 4, 1, 2).contiguous()
+    else:
+        feature = torch.cat((feature-x, x), dim=3).permute(0, 3, 4, 1, 2).contiguous()
+  
+    return feature
 
 def get_graph_feature_cross(x, k=20, idx=None):
     batch_size = x.size(0)

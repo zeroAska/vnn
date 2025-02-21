@@ -3,6 +3,7 @@ import torch.utils.data
 import torch.nn.functional as F
 from models.vn_layers import *
 from models.utils.vn_dgcnn_util import get_graph_feature
+#from egnn_pytorch import EGNN
 
 
 class get_model(nn.Module):
@@ -10,17 +11,19 @@ class get_model(nn.Module):
         super(get_model, self).__init__()
         self.args = args
         self.n_knn = args.n_knn
-        self.num_part = num_part        
+        
         self.bn7 = nn.BatchNorm1d(64)
         self.bn8 = nn.BatchNorm1d(256)
         self.bn9 = nn.BatchNorm1d(256)
         self.bn10 = nn.BatchNorm1d(128)
         
-        self.conv1 = VNLinearLeakyReLU(2, 64//3)
+        self.conv1 = VNLinearLeakyReLU(1, 64//3) #VNLinearLeakyReLU(2, 64//3)
         self.conv2 = VNLinearLeakyReLU(64//3, 64//3)
-        self.conv3 = VNLinearLeakyReLU(64//3*2, 64//3)
+        self.conv3 = VNLinearLeakyReLU(64//3, 64//3) #VNLinearLeakyReLU(64//3*2, 64//3)
         self.conv4 = VNLinearLeakyReLU(64//3, 64//3)
-        self.conv5 = VNLinearLeakyReLU(64//3*2, 64//3)
+        self.conv5 = VNLinearLeakyReLU(64//3, 64//3) #VNLinearLeakyReLU(64//3*2, 64//3)
+
+        #self.egnn1 = EGNN()
         
         if args.pooling == 'max':
             self.pool1 = VNMaxPool(64//3)
@@ -55,21 +58,21 @@ class get_model(nn.Module):
     def forward(self, x, l):
         batch_size = x.size(0)
         num_points = x.size(2)
-
-        import ipdb; ipdb.set_trace()
+        
         x = x.unsqueeze(1)
         
-        x = get_graph_feature(x, k=self.n_knn)
+        x = get_graph_feature(x, k=self.n_knn, is_dir_only=True)
         x = self.conv1(x)
         x = self.conv2(x)
         x1 = self.pool1(x)
         
-        x = get_graph_feature(x1, k=self.n_knn)
+        x = get_graph_feature(x1, k=self.n_knn, is_dir_only=True)
+
         x = self.conv3(x)
         x = self.conv4(x)
         x2 = self.pool2(x)
         
-        x = get_graph_feature(x2, k=self.n_knn)
+        x = get_graph_feature(x2, k=self.n_knn, is_dir_only=True)
         x = self.conv5(x)
         x3 = self.pool3(x)
         

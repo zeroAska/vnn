@@ -1,0 +1,3 @@
+[submodule "models/egnn-pytorch"]
+	path = models/egnn-pytorch
+	url = git@github.com:zeroAska/egnn-pytorch.git
